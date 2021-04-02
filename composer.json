@@ -1,0 +1,18 @@
+{
+	"name" : "tschallacka/mage2-magecommands",
+	"description" : "Magento 2 Command Utilities to aid developers and the development process",
+	"type" : "magento2-module",
+	"license" : "MIT",
+	"version" : "1.0.0",
+	"require" : {
+		"php" : "~7.3.0||~7.4.0"
+	},
+	"autoload" : {
+		"files" : [
+			"registration.php"
+		],
+		"psr-4" : {
+			"Tschallacka\\MageCommands\\" : "src"
+		}
+	}
+}

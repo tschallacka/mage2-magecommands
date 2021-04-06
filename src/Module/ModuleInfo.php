@@ -1,7 +1,7 @@
 <?php namespace Tschallacka\MageCommands\Module;
 
 use Tschallacka\MageCommands\Configuration\Config;
-use Illuminate\Support\Str;
+use Tschallacka\MageRain\Helper\Text\Str;
 use Tschallacka\MageRain\Helper\File\Directory;
 
 class ModuleInfo 
@@ -97,7 +97,7 @@ class ModuleInfo
     
     public function getPackageName() 
     {
-        return $this->hyphen_author_name .'/'.$this->hyphen_module_name;    
+        return $this->hyphen_author_name . '/' . $this->hyphen_module_name;    
     }
     
     /**

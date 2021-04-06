@@ -78,6 +78,7 @@ class CreateModule extends Command
         ]);
         $composer->type = "magento2-module";
         $composer->name = $module->getPackageName();
+        $output->writeln($module->getPackageName());
         $composer->save();
         $sourcepath = $module->getSourcePath();
         $sourcepath->create();

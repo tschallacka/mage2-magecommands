@@ -1,0 +1,7 @@
+<?php 
+namespace %s\Configuration;
+
+class Config 
+{
+    const MODULE_NAME = '%s';
+}

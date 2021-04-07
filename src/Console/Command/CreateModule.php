@@ -14,13 +14,15 @@ use Tschallacka\MageCommands\Configuration\Config;
 use Tschallacka\MageCommands\Module\ModuleInfo;
 use Tschallacka\MageRain\Helper\File\Format\Composer;
 use Tschallacka\MageRain\Helper\File\TemplateFile;
-
+use Tschallacka\MageRain\Helper\File\Directory;
 /**
  * Class CreateModule
  */
 class CreateModule extends Command
 {
     const CREATE_MODULE_COMMAND = 'tsch:module:create';
+    
+    const SETUP_AFTER_CREATE_COMMAND = '<fg=white;bg=cyan>composer require %s && bin/magento module:enable %s && bin/magento setup:upgrade && bin/magento setup:di:compile && bin/magento cache:clean</>';
     
     /**
      * Name argument
@@ -66,6 +68,7 @@ class CreateModule extends Command
         
         $dir = $module->getLocalPath();
         $dir->create();
+        
         $composer = new Composer($dir->getPath('composer.json'));
         $composer->initializeEmptyFile();
         $composer->addAuthor($module->getAuthorName());
@@ -78,8 +81,12 @@ class CreateModule extends Command
         ]);
         $composer->type = "magento2-module";
         $composer->name = $module->getPackageName();
-        $output->writeln($module->getPackageName());
         $composer->save();
+        
+        $output->writeln("Written composer.json to ".$module->getLocalPath().'/composer.json');
+        $output->writeln("Creating default plugin files");
+        
+        $output->writeln("Creating Configuration/Config.php");
         $sourcepath = $module->getSourcePath();
         $sourcepath->create();
         $config_dir = $sourcepath->createChildDirectory('Configuration');
@@ -88,10 +95,12 @@ class CreateModule extends Command
         $template->load();
         $template->save([$module->getNameSpace(), $module->getMagentoModuleName()]);
         
+        $output->writeln("Creating registration.php");
         $template = new TemplateFile(__DIR__.'/template/registration.txt', $dir->getPath('registration.php'));
         $template->load();
         $template->save([$module->getNameSpace()]);
         
+        $output->writeln("Creating etc/module.xml");
         $etcpath = $module->getEtcPath();
         $etcpath->create();
         
@@ -99,13 +108,56 @@ class CreateModule extends Command
         $template->load();
         $template->save([$module->getMagentoModuleName()]);
         
+        $output->writeln("Creating etc/di.xml");
         $template = new TemplateFile(__DIR__.'/template/di.txt', $etcpath->getPath('di.xml'));
         $template->load();
         $template->save([]);
         
+        $output->writeln("Modifying ".BP.'/composer.json');
+        
+        $magento_composer = new Composer(BP . '/composer.json');
+        $magento_composer->load();
+        $require = $magento_composer->get('require');
+        
+        if(!(array_key_exists($module->getPackageName(), $require))) {
+            $require[$module->getPackageName()] = '^1.0';
+            $magento_composer->require = $require;
+        }
+        
+        $repositories = $magento_composer->get('repositories', []);
+        $result = array_filter($repositories, function($item) use ($module) { return $item['type'] == 'path' && $item['url'] == $module->getLocalPath(); });
+        if(!count($result)) {
+            $repositories[] = [
+                'type' => 'path',
+                'url' => $module->getLocalPath()->getPath()
+            ];
+            $magento_composer->repositories = $repositories;
+        }
+        $magento_composer->save();
         
         
-        $output->writeln('<info>Hello ' . $name . '!</info>');
+        $output->writeln('<fg=white;bg=green>          Module '.$module->getMagentoModuleName() . ' has been successfully generated.                 </>');
+        $output->writeln('<fg=white;bg=red>===============================================================================</>');
+        $output->writeln('<fg=white;bg=red>          Read the follwing information carefully!!!!                          </>');
+        $output->writeln('<fg=white;bg=red>===============================================================================</>');
+        $output->writeln("You can find the package source files for editing in the editor of your choice");
+        $output->writeln("in <fg=yellow>". $module->getLocalPath()->getPath() . '</>');
+        $output->writeln("A symlink to this directory will be created in <fg=yellow>" . Config::getVendorDir() . "</> after");
+        $output->writeln("running the commands at the end of this output.");
+        $output->writeln("A new repository was added to <fg=yellow>" . BP . '/composer.json</> enabling the symlink.');
+        $output->writeln('If you do not wish to distribute this plugin via a symlinked repository you');
+        $output->writeln('will need to make the package available via alternative means(Github, Magento)');
+        $output->writeln("Place any PHP classes for your namespace <fg=yellow>". $module->getNameSpace() . '</> in the <fg=yellow>src/</> directory. ');
+        $output->writeln('Run <fg=white;bg=cyan>composer update '.$module->getPackageName().'</> if they do not get autoloaded.');
+        
+        $output->writeln("Any changes to <fg=yellow>". $module->getLocalPath()->getPath() . '/composer.json</> must be realised');
+        $output->writeln('by running <fg=white;bg=cyan>composer update '.$module->getPackageName().'</> in the Magento root directory');
+        $output->writeln('<fg=yellow>'.BP.'</>. This ensures you have a clean working directory for your code.');
+        
+        $output->writeln("<fg=white;bg=red>Keep in mind that the module created is for developing purposes! When you are ready to move it to production don't forget to package like you normally would!</>");
+        
+        $output->writeln('<fg=white;bg=green>Run the following command to install your new plugin into magento:             </>');
+        $output->writeln(sprintf(self::SETUP_AFTER_CREATE_COMMAND, $module->getPackageName(), $module->getMagentoModuleName()));
     }
     
     

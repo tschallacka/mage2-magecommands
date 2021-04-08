@@ -54,22 +54,71 @@ class CreateModule extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         
+        $module = $this->getModuleInfoFromValidArgument($input);
+        
+        
+        $output->writeln("Creating directory structure for module ".$input);
+        
+        $dir =$module->getLocalPath()->create();
+        $sourcepath = $module->getSourcePath()->create();
+        $config_dir = $sourcepath->createChildDirectory('Configuration');
+        $etcpath = $module->getEtcPath()->create();
+        
+        $this->createModuleComposerJson($output, $module);
+     
+        $this->writeTemplatedFile($output, 'configuration.txt', 
+                                  $config_dir->getPath('Config.php'), 
+                                  [
+                                      $module->getNameSpace(), 
+                                      $module->getMagentoModuleName()
+                                  ]);
+        
+        $this->writeTemplatedFile($output, 'registration.txt', 
+                                  $dir->getPath('registration.php'), 
+                                  [
+                                      $module->getNameSpace()
+                                  ]);
+        
+        $this->writeTemplatedFile($output, 'module.txt', 
+                                  $etcpath->getPath('module.xml'), 
+                                  [
+                                      $module->getMagentoModuleName()
+                                  ]);
+        
+        $this->writeTemplatedFile($output, 'di.txt', 
+                                  $etcpath->getPath('di.xml')
+                                 );
+        
+        $this->registerModuleInMagentoComposer($output, $module);
+        $this->printSuccess($output, $module);
+    }
+    
+    /**
+     * Creates a ModuleInfo from a given argument in the form of AuthorName_PluginName
+     * after validating that the given argument is in the correct format and the plugin
+     * does not exist at this moment.
+     * @param InputInterface $input
+     * @throws InvalidArgumentException
+     * @return \Tschallacka\MageCommands\Module\ModuleInfo
+     */
+    protected function getModuleInfoFromValidArgument(InputInterface $input)
+    {
         $args = $input->getArgument(self::MODULE_NAME_ARGUMENT);
         if(!is_array($args) || count($args) < 1) {
             throw new InvalidArgumentException('No module name in the format of AuthorName_ModuleName provided. Please use bin/magento '.self::CREATE_MODULE_COMMAND. ' AuthorName_ModuleName');
         }
         $name = array_shift($args);
-        if(!$this->checkModuleNameValidity($name)) return; 
+        $this->checkModuleNameValidity($name);
         
         $module = new ModuleInfo($name);
+        $module->checkIfDirectoryExists();
         
-        if(!$module->checkIfDirectoryExists()) return;
-        $output->writeln("Creating directory for module ".$input);
-        
-        $dir = $module->getLocalPath();
-        $dir->create();
-        
-        $composer = new Composer($dir->getPath('composer.json'));
+        return $module;
+    }
+    
+    protected function createModuleComposerJson(OutputInterface $output, ModuleInfo $module) 
+    {
+        $composer = new Composer($module->getLocalPath()->getPath('composer.json'));
         $composer->initializeEmptyFile();
         $composer->addAuthor($module->getAuthorName());
         $composer->description = "A magento2 module";
@@ -83,37 +132,28 @@ class CreateModule extends Command
         $composer->name = $module->getPackageName();
         $composer->save();
         
-        $output->writeln("Written composer.json to ".$module->getLocalPath().'/composer.json');
-        $output->writeln("Creating default plugin files");
-        
-        $output->writeln("Creating Configuration/Config.php");
-        $sourcepath = $module->getSourcePath();
-        $sourcepath->create();
-        $config_dir = $sourcepath->createChildDirectory('Configuration');
-        
-        $template = new TemplateFile(__DIR__.'/template/configuration.txt', $config_dir->getPath('Config.php'));
+        $output->writeln("Written module composer.json to ".$module->getLocalPath().'/composer.json');
+    }
+    
+    protected function writeTemplatedFile(OutputInterface $output, $filename, $destination_path, $arguments=[]) 
+    {
+        $output->writeln("Creating <fg=yellow>$destination_path</>");
+        $template = new TemplateFile(__DIR__.'/template/'.$filename, $destination_path);
         $template->load();
-        $template->save([$module->getNameSpace(), $module->getMagentoModuleName()]);
-        
-        $output->writeln("Creating registration.php");
-        $template = new TemplateFile(__DIR__.'/template/registration.txt', $dir->getPath('registration.php'));
-        $template->load();
-        $template->save([$module->getNameSpace()]);
-        
-        $output->writeln("Creating etc/module.xml");
-        $etcpath = $module->getEtcPath();
-        $etcpath->create();
-        
-        $template = new TemplateFile(__DIR__.'/template/module.txt', $etcpath->getPath('module.xml'));
-        $template->load();
-        $template->save([$module->getMagentoModuleName()]);
-        
-        $output->writeln("Creating etc/di.xml");
-        $template = new TemplateFile(__DIR__.'/template/di.txt', $etcpath->getPath('di.xml'));
-        $template->load();
-        $template->save([]);
-        
-        $output->writeln("Modifying ".BP.'/composer.json');
+        $template->save($arguments);
+    }
+    
+    /**
+     * Adds a repository to the magento root directory composer.json pointing to the newly created directory
+     * in magento_root_dir/local and adds the new package name to the magento require array.
+     * This ensures that a symlink to the local directory will be created in the vendor directory
+     * pointing to the development directory.
+     * @param OutputInterface $output
+     * @param ModuleInfo $module
+     */
+    protected function registerModuleInMagentoComposer(OutputInterface $output, ModuleInfo $module)
+    {
+        $output->writeln("Modifying " . BP . '/composer.json');
         
         $magento_composer = new Composer(BP . '/composer.json');
         $magento_composer->load();
@@ -125,7 +165,11 @@ class CreateModule extends Command
         }
         
         $repositories = $magento_composer->get('repositories', []);
-        $result = array_filter($repositories, function($item) use ($module) { return $item['type'] == 'path' && $item['url'] == $module->getLocalPath(); });
+        
+        $result = array_filter($repositories, function($item) use ($module) { 
+            return $item['type'] == 'path' && $item['url'] == $module->getLocalPath(); 
+        });
+        
         if(!count($result)) {
             $repositories[] = [
                 'type' => 'path',
@@ -134,8 +178,16 @@ class CreateModule extends Command
             $magento_composer->repositories = $repositories;
         }
         $magento_composer->save();
-        
-        
+    }
+    
+    /**
+     * Prints the success message and need to know information after creation
+     * of a module using the command bin/magento tsch:module:create
+     * @param OutputInterface $output
+     * @param ModuleInfo $module
+     */
+    protected function printSuccess(OutputInterface $output, ModuleInfo $module) 
+    {
         $output->writeln('<fg=white;bg=green>          Module '.$module->getMagentoModuleName() . ' has been successfully generated.                 </>');
         $output->writeln('<fg=white;bg=red>===============================================================================</>');
         $output->writeln('<fg=white;bg=red>          Read the follwing information carefully!!!!                          </>');
@@ -160,21 +212,29 @@ class CreateModule extends Command
         $output->writeln(sprintf(self::SETUP_AFTER_CREATE_COMMAND, $module->getPackageName(), $module->getMagentoModuleName()));
     }
     
-    
+    /**
+     * Checks wether an module name argument is given at all
+     * Checks wether the given string is a valid argument to provide to this command
+     * checks wether the given module already exists in this magento installation
+     * @param string $name
+     * @throws \InvalidArgumentException when the given module name does not meet the criterea
+     * @return boolean
+     */
     protected function checkModuleNameValidity($name) 
     {
         if (is_null($name) || empty($name)) {
             throw new \InvalidArgumentException('Argument ' . self::MODULE_NAME_ARGUMENT . ' is missing.');
         }
+        
         $pos = strpos($name, '_');
         if($pos === false || $pos === 0 || $pos == strlen($name) - 1) {
             throw new \InvalidArgumentException('Argument ' . self::MODULE_NAME_ARGUMENT . ' needs to be in format AuthorName_ModuleName instead "'.$name.'" was provided.');
         }
+        
         $list = ObjectManager::getInstance()->create(FullModuleList::class);
         if($list->has($name)) {
             throw new \InvalidArgumentException('The module '. $name .' already exists. Please use another module name.');
         }
-        
         
         return true;
     }

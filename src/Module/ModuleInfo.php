@@ -30,6 +30,11 @@ class ModuleInfo
         return str_replace("_", "-", Str::snake($str));
     }
     
+    /**
+     * If the directory exists this method will throw an exception
+     * @param Directory $path
+     * @throws \InvalidArgumentException
+     */
     protected function failTestPath(Directory $path) 
     {
         if($path->exists()) {
@@ -110,7 +115,9 @@ class ModuleInfo
     }
     
     /**
-     * Tests wether the module is already present on disk
+     * Tests wether the module is already present on disk in the local development
+     * directory or in the magento root composer verdor directory.
+     * @throws \InvalidArgumentException when a matching directory is found
      * @return boolean
      */
     public function checkIfDirectoryExists() 

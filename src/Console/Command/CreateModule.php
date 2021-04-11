@@ -15,6 +15,7 @@ use Tschallacka\MageCommands\Module\ModuleInfo;
 use Tschallacka\MageRain\Helper\File\Format\Composer;
 use Tschallacka\MageRain\Helper\File\TemplateFile;
 use Tschallacka\MageRain\Helper\File\Directory;
+use Tschallacka\MageRain\Helper\File\Transformer\StringReplaceTransformer;
 /**
  * Class CreateModule
  */
@@ -59,10 +60,12 @@ class CreateModule extends Command
         
         $output->writeln("Creating directory structure for module ".$input);
         
-        $dir =$module->getLocalPath()->create();
+        $dir = $module->getLocalPath()->create();
         $sourcepath = $module->getSourcePath()->create();
         $config_dir = $sourcepath->createChildDirectory('Configuration');
         $etcpath = $module->getEtcPath()->create();
+        
+        $this->createUnitTestFolder($output, $module);
         
         $this->createModuleComposerJson($output, $module);
      
@@ -91,6 +94,36 @@ class CreateModule extends Command
         
         $this->registerModuleInMagentoComposer($output, $module);
         $this->printSuccess($output, $module);
+    }
+    
+    /**
+     * Creates a unit testing directory with a copy of the current
+     * magento php unit xml.dist fiile for bootstrapping.
+     */
+    protected function createUnitTestFolder($output, $module) 
+    {
+        $testDir = $module->getLocalPath()->createChildDirectory('tests');
+        $unitDir = $testDir->createChildDirectory('unit');
+        
+        $php_unit_xml_path = $unitDir->getPath('phpunit.xml');
+        $unitTest = new TemplateFile(BP . '/dev/tests/unit/phpunit.xml.dist', $php_unit_xml_path);
+        $unitTest->load();
+        
+        $magento_root = '../../../';
+        $dev_root = '../../';
+        $magento_relative_path = str_replace(BP.'/','', $unitTest->getDirectory()->getPath());
+        /** https://regex101.com/r/ZUDS1L/1 */
+        $phpunit_relative_path_to_root = preg_replace("/(^|\/?)(.+?)(\/|$)/", '$1..$3', $magento_relative_path);
+        
+        $root_path = $phpunit_relative_path_to_root.'/';
+        $dev_path = $phpunit_relative_path_to_root . '/dev/';
+        
+        $unitTest->addTransformer(new StringReplaceTransformer([$magento_root, $dev_root], [$root_path, $dev_path]));
+        $unitTest->save([]);
+        
+        $frameworkDir = $unitDir->createChildDirectory('framework');
+        
+        $this->writeTemplatedFile($output, 'phpunit_bootstrap.txt', $frameworkDir->getPath('bootstrap.php'), [$phpunit_relative_path_to_root.'/..']);
     }
     
     /**

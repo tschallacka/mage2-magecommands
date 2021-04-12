@@ -4,6 +4,7 @@
         <arguments>
             <argument name="commands" xsi:type="array">
                 <item name="create_module" xsi:type="object">Tschallacka\MageCommands\Console\Command\CreateModule</item>
+                <item name="create_module_command" xsi:type="object">Tschallacka\MageCommands\Console\Command\CreateModuleCommand</item>
             </argument>
         </arguments>
     </type>

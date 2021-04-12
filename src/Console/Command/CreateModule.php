@@ -36,11 +36,11 @@ class CreateModule extends Command
     protected function configure()
     {
         $this->setName(self::CREATE_MODULE_COMMAND)
-            ->setDescription('Create a module in the app/code folder')
+            ->setDescription('Create a module in the local folder')
             ->setDefinition([
                 new InputArgument(
                     self::MODULE_NAME_ARGUMENT,
-                    InputArgument::IS_ARRAY | InputArgument::REQUIRED,
+                    InputArgument::REQUIRED,
                     'Module name in the format AuthorName_ModuleName'
                 ),
 
@@ -99,11 +99,13 @@ class CreateModule extends Command
     /**
      * Creates a unit testing directory with a copy of the current
      * magento php unit xml.dist fiile for bootstrapping.
+     * @var $output OutputInterface
      */
-    protected function createUnitTestFolder($output, $module) 
+    protected function createUnitTestFolder(OutputInterface $output, ModuleInfo $module) 
     {
         $testDir = $module->getLocalPath()->createChildDirectory('tests');
         $unitDir = $testDir->createChildDirectory('unit');
+        $codeDir = $testDir->createChildDirectory('code');
         
         $php_unit_xml_path = $unitDir->getPath('phpunit.xml');
         $unitTest = new TemplateFile(BP . '/dev/tests/unit/phpunit.xml.dist', $php_unit_xml_path);
@@ -124,6 +126,44 @@ class CreateModule extends Command
         $frameworkDir = $unitDir->createChildDirectory('framework');
         
         $this->writeTemplatedFile($output, 'phpunit_bootstrap.txt', $frameworkDir->getPath('bootstrap.php'), [$phpunit_relative_path_to_root.'/..']);
+        
+        $this->modifyTestSuite($output, $module, $php_unit_xml_path);
+        
+        
+    }
+    
+    /**
+     * 
+     * @param OutputInterface $output
+     * @param ModuleInfo $module
+     * @param string $php_unit_xml_path
+     */
+    protected function modifyTestSuite(OutputInterface $output, ModuleInfo $module, $php_unit_xml_path) 
+    {
+        $phpunit_dom = new \DOMDocument();
+        $phpunit_dom->load($php_unit_xml_path);
+        $root = $phpunit_dom->getElementsByTagName('phpunit')->item(0);
+        
+        $testsuite = null;
+        $testsuites = $phpunit_dom->getElementsByTagName('testsuites');
+        if($testsuites->count() == 0) {
+            $testsuite = $phpunit_dom->createElement('testsuites');
+            $root->appendChild($testsuites);
+        }
+        else {
+            $testsuite = $testsuites->item(0);
+        }
+        $suite = $phpunit_dom->createElement('testsuite');
+        $suite->setAttribute('name', $module->getMagentoModuleName());
+        $testsuite->appendChild($suite);
+        
+        $directory = $phpunit_dom->createElement('directory');
+        $suite->appendChild($directory);
+        
+        $text = $phpunit_dom->createTextNode('../code');
+        $directory->appendChild($text);
+        
+        $phpunit_dom->save($php_unit_xml_path);
     }
     
     /**
@@ -136,11 +176,8 @@ class CreateModule extends Command
      */
     protected function getModuleInfoFromValidArgument(InputInterface $input)
     {
-        $args = $input->getArgument(self::MODULE_NAME_ARGUMENT);
-        if(!is_array($args) || count($args) < 1) {
-            throw new InvalidArgumentException('No module name in the format of AuthorName_ModuleName provided. Please use bin/magento '.self::CREATE_MODULE_COMMAND. ' AuthorName_ModuleName');
-        }
-        $name = array_shift($args);
+        $name = $input->getArgument(self::MODULE_NAME_ARGUMENT);
+        
         $this->checkModuleNameValidity($name);
         
         $module = new ModuleInfo($name);

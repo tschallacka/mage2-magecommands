@@ -8,7 +8,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Magento\Framework\App\ObjectManager;
-use Magento\Framework\Module\FullModuleList;
+
 
 use Tschallacka\MageCommands\Configuration\Config;
 use Tschallacka\MageCommands\Module\ModuleInfo;
@@ -177,9 +177,7 @@ class CreateModule extends Command
     protected function getModuleInfoFromValidArgument(InputInterface $input)
     {
         $name = $input->getArgument(self::MODULE_NAME_ARGUMENT);
-        
-        $this->checkModuleNameValidity($name);
-        
+                
         $module = new ModuleInfo($name);
         $module->checkIfDirectoryExists();
         
@@ -236,7 +234,8 @@ class CreateModule extends Command
         
         $repositories = $magento_composer->get('repositories', []);
         
-        $result = array_filter($repositories, function($item) use ($module) { 
+        $result = array_filter($repositories, function($item) use ($module, $output) {
+            $output->writeln($item['type'].' - '.$item['url'] . ' == '.$module->getLocalPath());
             return $item['type'] == 'path' && $item['url'] == $module->getLocalPath(); 
         });
         
@@ -264,7 +263,7 @@ class CreateModule extends Command
         $output->writeln('<fg=white;bg=red>===============================================================================</>');
         $output->writeln("You can find the package source files for editing in the editor of your choice");
         $output->writeln("in <fg=yellow>". $module->getLocalPath()->getPath() . '</>');
-        $output->writeln("A symlink to this directory will be created in <fg=yellow>" . Config::getVendorDir() . "</> after");
+        $output->writeln("A symlink to this directory will be created in <fg=yellow>" . Directory::getMagentoVendorDir() . "</> after");
         $output->writeln("running the commands at the end of this output.");
         $output->writeln("A new repository was added to <fg=yellow>" . BP . '/composer.json</> enabling the symlink.');
         $output->writeln('If you do not wish to distribute this plugin via a symlinked repository you');
@@ -276,39 +275,10 @@ class CreateModule extends Command
         $output->writeln('by running <fg=white;bg=cyan>composer update '.$module->getPackageName().'</> in the Magento root directory');
         $output->writeln('<fg=yellow>'.BP.'</>. This ensures you have a clean working directory for your code.');
         
-        $output->writeln("<fg=white;bg=red>Keep in mind that the module created is for developing purposes! When you are ready to move it to production don't forget to package like you normally would!</>");
+        $output->writeln('<fg=white;bg=red>Keep in mind that the module created is for developing purposes! When you are</>'); 
+        $output->writeln('<fg=white;bg=red>ready to move it to production don\'t forget to package like you normally would!</>');
         
         $output->writeln('<fg=white;bg=green>Run the following command to install your new plugin into magento:             </>');
         $output->writeln(sprintf(self::SETUP_AFTER_CREATE_COMMAND, $module->getPackageName(), $module->getMagentoModuleName()));
-    }
-    
-    /**
-     * Checks wether an module name argument is given at all
-     * Checks wether the given string is a valid argument to provide to this command
-     * checks wether the given module already exists in this magento installation
-     * @param string $name
-     * @throws \InvalidArgumentException when the given module name does not meet the criterea
-     * @return boolean
-     */
-    protected function checkModuleNameValidity($name) 
-    {
-        if (is_null($name) || empty($name)) {
-            throw new \InvalidArgumentException('Argument ' . self::MODULE_NAME_ARGUMENT . ' is missing.');
-        }
-        
-        $pos = strpos($name, '_');
-        if($pos === false || $pos === 0 || $pos == strlen($name) - 1) {
-            throw new \InvalidArgumentException('Argument ' . self::MODULE_NAME_ARGUMENT . ' needs to be in format AuthorName_ModuleName instead "'.$name.'" was provided.');
-        }
-        
-        $list = ObjectManager::getInstance()->create(FullModuleList::class);
-        if($list->has($name)) {
-            throw new \InvalidArgumentException('The module '. $name .' already exists. Please use another module name.');
-        }
-        
-        return true;
-    }
-    
-    
-        
+    }       
 }

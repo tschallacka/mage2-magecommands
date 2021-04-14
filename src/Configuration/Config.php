@@ -1,7 +1,7 @@
 <?php 
 namespace Tschallacka\MageCommands\Configuration;
 
-use Tschallacka\MageRain\Helper\File\Directory;
+use Tschallacka\MageRain\File\Directory;
 
 class Config 
 {

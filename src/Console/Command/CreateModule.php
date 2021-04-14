@@ -12,10 +12,10 @@ use Magento\Framework\App\ObjectManager;
 
 use Tschallacka\MageCommands\Configuration\Config;
 use Tschallacka\MageCommands\Module\ModuleInfo;
-use Tschallacka\MageRain\Helper\File\Format\Composer;
-use Tschallacka\MageRain\Helper\File\TemplateFile;
-use Tschallacka\MageRain\Helper\File\Directory;
-use Tschallacka\MageRain\Helper\File\Transformer\StringReplaceTransformer;
+use Tschallacka\MageRain\File\Format\Composer;
+use Tschallacka\MageRain\File\TemplateFile;
+use Tschallacka\MageRain\File\Directory;
+use Tschallacka\MageRain\File\Transformer\StringReplaceTransformer;
 /**
  * Class CreateModule
  */

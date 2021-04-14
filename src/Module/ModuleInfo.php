@@ -2,8 +2,8 @@
 
 use Tschallacka\MageCommands\Configuration\Config;
 
-use Tschallacka\MageRain\Helper\File\Directory;
-use Tschallacka\MageRain\Helper\Module\ModuleInfo as BaseInfo;
+use Tschallacka\MageRain\File\Directory;
+use Tschallacka\MageRain\Module\ModuleInfo as BaseInfo;
 
 class ModuleInfo extends BaseInfo
 {
@@ -23,7 +23,7 @@ class ModuleInfo extends BaseInfo
     
     /**
      * Returns the path of the module in the local development directory.
-     * @return \Tschallacka\MageRain\Helper\File\Directory
+     * @return \Tschallacka\MageRain\File\Directory
      */
     public function getLocalPath() 
     {

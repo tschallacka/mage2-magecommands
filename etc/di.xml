@@ -8,4 +8,30 @@
             </argument>
         </arguments>
     </type>
+    <type name="Tschallacka\MageCommands\Configuration\Config">
+        <arguments>
+            <argument name="base_path" xsi:type="const">
+                Tschallacka\MageRain\File\Directory::BASE_PATH
+            </argument>
+            <argument name="development_directory" xsi:type="string">
+                local/
+            </argument>
+        </arguments>
+    </type>
+    <type name="Tschallacka\MageCommands\Console\Command\CreateModule">
+        <arguments>
+            <argument name="name" xsi:type="null"></argument>
+            <argument name="config" xsi:type="object">
+                Tschallacka\MageCommands\Configuration\Config
+            </argument>
+        </arguments>
+    </type>
+    <type name="Tschallacka\MageCommands\Console\Command\CreateModuleCommand">
+        <arguments>
+            <argument name="name" xsi:type="null"></argument>
+            <argument name="config" xsi:type="object">
+                Tschallacka\MageCommands\Configuration\Config
+            </argument>
+        </arguments>
+    </type>
 </config>

@@ -9,6 +9,14 @@ class ModuleInfo extends BaseInfo
 {
     protected $project_local_path;
     
+    protected $config;
+    
+    public function __construct($raw_name, Config $config)
+    {
+        $this->config = $config;
+        parent::__construct($raw_name);
+    }
+    
     /**
      * If the directory exists this method will throw an exception
      * @param Directory $path
@@ -30,7 +38,7 @@ class ModuleInfo extends BaseInfo
         if(is_null($this->project_local_path)) {
             $author = $this->hyphen_author_name;
             $module = $this->hyphen_module_name;
-            $local_path_author = Config::getLocalDir() . '/' . $author;
+            $local_path_author = $this->config->getLocalPath() . '/' . $author;
             
             $this->project_local_path = new Directory($local_path_author . '/' . $module);
             
@@ -39,9 +47,17 @@ class ModuleInfo extends BaseInfo
         return $this->project_local_path;
     }
     
+    public function getVendorPath($vendor_path = null) 
+    {
+        if(is_null($vendor_path)) {
+            return parent::getVendorPath($this->config->getVendorPath());
+        }
+        return parent::getVendorPath($vendor_path);
+    }
+    
     /**
      * Returns the location of the src directory
-     * @return \Tschallacka\MageRain\Helper\File\Directory
+     * @return \Tschallacka\MageRain\File\Directory
      */
     public function getSourcePath()
     {
@@ -50,7 +66,7 @@ class ModuleInfo extends BaseInfo
     
     /**
      * Returns the location of the etc directory
-     * @return \Tschallacka\MageRain\Helper\File\Directory
+     * @return \Tschallacka\MageRain\File\Directory
      */
     public function getEtcPath()
     {

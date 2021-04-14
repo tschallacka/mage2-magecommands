@@ -29,6 +29,17 @@ class CreateModule extends Command
      * Name argument
      */
     const MODULE_NAME_ARGUMENT = 'name';
+    
+    /**
+     * @var Config
+     */
+    protected $config;
+    
+    public function __construct(string $name=null, Config $config)
+    {
+       $this->config = $config;
+       parent::__construct($name);
+    }
 
     /**
      * {@inheritdoc}
@@ -128,8 +139,6 @@ class CreateModule extends Command
         $this->writeTemplatedFile($output, 'phpunit_bootstrap.txt', $frameworkDir->getPath('bootstrap.php'), [$phpunit_relative_path_to_root.'/..']);
         
         $this->modifyTestSuite($output, $module, $php_unit_xml_path);
-        
-        
     }
     
     /**
@@ -178,7 +187,7 @@ class CreateModule extends Command
     {
         $name = $input->getArgument(self::MODULE_NAME_ARGUMENT);
                 
-        $module = new ModuleInfo($name);
+        $module = new ModuleInfo($name, $this->config);
         $module->checkIfDirectoryExists();
         
         return $module;
@@ -221,9 +230,9 @@ class CreateModule extends Command
      */
     protected function registerModuleInMagentoComposer(OutputInterface $output, ModuleInfo $module)
     {
-        $output->writeln("Modifying " . BP . '/composer.json');
-        
-        $magento_composer = new Composer(BP . '/composer.json');
+        $BP = $this->config->getBasePath();
+        $output->writeln("Modifying " . $BP . '/composer.json');
+        $magento_composer = new Composer($BP . '/composer.json');
         $magento_composer->load();
         $require = $magento_composer->get('require');
         

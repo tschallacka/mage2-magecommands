@@ -23,13 +23,19 @@ class CreateModuleCommand extends Command
     
     const COMMAND_ARGUMENTS = 'command arguments';
     
+    public function __construct($name = null, Config $config)
+    {
+        $this->config = $config;
+        parent::__construct($name);
+    }
+    
     /**
      * {@inheritdoc}
      */
     protected function configure()
     {
         $this->setName(self::CREATE_MODULE_COMMAND_COMMAND)
-        ->setDescription('Create a command in a module in the local folder. This command will fail if the module isn\'t present in the local development folder in '.BP.'/'.Config::DEVELOPMENT_DIRECTORY)
+        ->setDescription('Create a command in a module in the local folder. This command will fail if the module isn\'t present in the local development folder in '.BP.'/'.$this->config->getLocalPath())
         ->setDefinition([
             new InputArgument(
                 self::MODULE_NAME_ARGUMENT,

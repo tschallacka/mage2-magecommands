@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alr:test-suite xmlns:alr="urn:model.allure.qatools.yandex.ru" start="1618864258610" stop="1618864258612" version="1.4.0">
+  <name>Tschallacka\MageCommands\Tests\Code\Unit\Test\Module\ModuleInfoTest</name>
+  <test-cases>
+    <test-case start="1618864258610" stop="1618864258611" status="passed">
+      <name>testFailTestPath</name>
+    </test-case>
+    <test-case start="1618864258611" stop="1618864258611" status="passed">
+      <name>testGetLocalPath</name>
+    </test-case>
+    <test-case start="1618864258611" stop="1618864258611" status="passed">
+      <name>testGetVendorPath</name>
+    </test-case>
+    <test-case start="1618864258611" stop="1618864258612" status="passed">
+      <name>testGetSourcePath</name>
+    </test-case>
+    <test-case start="1618864258612" stop="1618864258612" status="passed">
+      <name>testGetEtcPath</name>
+    </test-case>
+    <test-case start="1618864258612" stop="1618864258612" status="passed">
+      <name>testCheckIfDirectoryExists</name>
+    </test-case>
+  </test-cases>
+</alr:test-suite>

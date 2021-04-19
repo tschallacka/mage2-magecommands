@@ -1,4 +1,4 @@
-<?php namespace Tschallacka\MageCommands\Tests\Code\Unit\Test\Module;
+<?php namespace Tschallacka\MageCommands\Tests\Code\Unit\Test\Console\Command;
 
 use PHPUnit\Framework\TestCase;
 use Tschallacka\MageCommands\Configuration\Config;

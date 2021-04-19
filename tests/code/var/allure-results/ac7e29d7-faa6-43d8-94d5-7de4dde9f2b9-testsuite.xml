@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alr:test-suite xmlns:alr="urn:model.allure.qatools.yandex.ru" start="1618864258602" stop="1618864258608" version="1.4.0">
+  <name>Tschallacka\MageCommands\Tests\Code\Unit\Test\Console\Command\CreateModuleTest</name>
+  <test-cases>
+    <test-case start="1618864258602" stop="1618864258606" status="passed">
+      <name>testAddPackageToRequire</name>
+    </test-case>
+    <test-case start="1618864258607" stop="1618864258607" status="passed">
+      <name>testAddPackageAsLocalRepository</name>
+    </test-case>
+    <test-case start="1618864258607" stop="1618864258607" status="passed">
+      <name>testWriteModuleToComposer</name>
+    </test-case>
+  </test-cases>
+</alr:test-suite>

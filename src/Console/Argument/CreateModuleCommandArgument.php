@@ -27,7 +27,7 @@ class CreateModuleCommandArgument
     public function validateNeed($need)
     {
         if($need != self::REQUIRED && $need != self::OPTIONAL) {
-            $this->invalidArgument('Invalid value for the need of the parameter. Valid values are "'.self::REQUIRED.'" and "'. self::OPTIONAL.'". Provided value is '. sneed);
+            $this->invalidArgument('Invalid value for the need of the parameter. Valid values are "'.self::REQUIRED.'" and "'. self::OPTIONAL.'". Provided value is '. $need);
         }
     }
     

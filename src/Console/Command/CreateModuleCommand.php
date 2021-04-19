@@ -66,6 +66,8 @@ class CreateModuleCommand extends Command
         $cmd = $input->getArgument(self::COMMAND_NAME_ARGUMENT);
         echo $output->writeln($cmd);
         $arguments = $input->getArgument(self::COMMAND_ARGUMENTS);
+        
+        dump($arguments);
         /*if(!is_array($args) || count($args) < 1) {
         throw new InvalidArgumentException('No module name in the format of AuthorName_ModuleName provided. Please use bin/magento '.self::CREATE_MODULE_COMMAND. ' AuthorName_ModuleName');
         }*/

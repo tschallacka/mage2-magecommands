@@ -195,8 +195,16 @@ class CreateModule extends Command
     
     protected function createModuleComposerJson(OutputInterface $output, ModuleInfo $module) 
     {
-        $composer = new Composer($module->getLocalPath()->getPath('composer.json'));
+        $composer = $this->getComposer($module->getLocalPath()->getPath('composer.json'));
         $composer->initializeEmptyFile();
+        $this->writeModuleToComposer($composer, $module);
+        $composer->save();
+        
+        $output->writeln("Written module composer.json to ".$module->getLocalPath().'/composer.json');
+    }
+    
+    public function writeModuleToComposer(Composer $composer, ModuleInfo $module)
+    {
         $composer->addAuthor($module->getAuthorName());
         $composer->description = "A magento2 module";
         $composer->put('autoload.psr-4', [
@@ -207,9 +215,6 @@ class CreateModule extends Command
         ]);
         $composer->type = "magento2-module";
         $composer->name = $module->getPackageName();
-        $composer->save();
-        
-        $output->writeln("Written module composer.json to ".$module->getLocalPath().'/composer.json');
     }
     
     protected function writeTemplatedFile(OutputInterface $output, $filename, $destination_path, $arguments=[]) 
@@ -231,31 +236,55 @@ class CreateModule extends Command
     protected function registerModuleInMagentoComposer(OutputInterface $output, ModuleInfo $module)
     {
         $BP = $this->config->getBasePath();
-        $output->writeln("Modifying " . $BP . '/composer.json');
-        $magento_composer = new Composer($BP . '/composer.json');
+        $path = $BP . '/composer.json';
+        $output->writeln("Modifying " . $path);
+        $magento_composer = $this->getComposer($path);
         $magento_composer->load();
-        $require = $magento_composer->get('require');
         
-        if(!(array_key_exists($module->getPackageName(), $require))) {
-            $require[$module->getPackageName()] = '^1.0';
-            $magento_composer->require = $require;
-        }
+        $this->addPackageToRequire($magento_composer, $module);
+        $this->addPackageAsLocalRepository($magento_composer, $module);
         
-        $repositories = $magento_composer->get('repositories', []);
+        $magento_composer->save();
+    }
+    
+    public function addPackageAsLocalRepository(Composer $composer, ModuleInfo $module)
+    {
+        $repositories = $composer->get('repositories', []);
+        $path = $module->getLocalPath()->getPath();
         
-        $result = array_filter($repositories, function($item) use ($module, $output) {
-            $output->writeln($item['type'].' - '.$item['url'] . ' == '.$module->getLocalPath());
-            return $item['type'] == 'path' && $item['url'] == $module->getLocalPath(); 
+        $result = array_filter($repositories, function($item) use ($path) {
+            return $item['type'] == 'path' && $item['url'] == $path;
         });
-        
+            
         if(!count($result)) {
             $repositories[] = [
                 'type' => 'path',
-                'url' => $module->getLocalPath()->getPath()
+                'url' => $path
             ];
-            $magento_composer->repositories = $repositories;
+            $composer->repositories = $repositories;
         }
-        $magento_composer->save();
+        return $composer;
+    }
+    
+    public function addPackageToRequire(Composer $composer, ModuleInfo $module)
+    {
+        $require = $composer->get('require', []);
+        
+        if(!(array_key_exists($module->getPackageName(), $require))) {
+            $require[$module->getPackageName()] = '^1.0';
+            $composer->require = $require;
+        }
+        return $composer;
+    }
+    
+    /**
+     * @param string $path
+     * @return \Tschallacka\MageRain\File\Format\Composer
+     */
+    public function getComposer($path)
+    {
+        $composer = new Composer($path);
+        return $composer;
     }
     
     /**

@@ -20,7 +20,7 @@
             <directory>../../../../../vendor/*/framework/*/Test/Unit</directory>
             <directory>../../../../../dev/tests/unit/*/Test/Unit</directory>
         </testsuite>
-    <testsuite name="Admin_FooBar"><directory>../code</directory></testsuite></testsuites>
+    <testsuite name="Tschallacka_MageCommands"><directory>../code</directory></testsuite></testsuites>
     <php>
         <ini name="date.timezone" value="America/Los_Angeles"/>
         <ini name="xdebug.max_nesting_level" value="200"/>

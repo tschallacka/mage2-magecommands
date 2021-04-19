@@ -14,19 +14,21 @@ class ModuleInfo extends BaseInfo
     public function __construct($raw_name, Config $config)
     {
         $this->config = $config;
-        parent::__construct($raw_name);
+        parent::__construct($raw_name, $config->getFullModuleList());
     }
     
     /**
      * If the directory exists this method will throw an exception
      * @param Directory $path
      * @throws \InvalidArgumentException
+     * @return boolean true on success.
      */
-    protected function failTestPath(Directory $path) 
+    public function failTestPath(Directory $path) 
     {
         if($path->exists()) {
-            throw new \InvalidArgumentException($this->project_local_path->getPath() . " already exists. Creating " . $this->raw_name." failed.");
+            throw new \InvalidArgumentException($path->getPath() . " already exists. Creating " . $this->raw_name." failed.");
         }
+        return true;
     }
     
     /**
@@ -38,9 +40,9 @@ class ModuleInfo extends BaseInfo
         if(is_null($this->project_local_path)) {
             $author = $this->hyphen_author_name;
             $module = $this->hyphen_module_name;
-            $local_path_author = $this->config->getLocalPath() . '/' . $author;
+            $local_path = new Directory($this->config->getLocalPath());
             
-            $this->project_local_path = new Directory($local_path_author . '/' . $module);
+            $this->project_local_path = $local_path->getChild($author)->getChild($module);
             
         }
         

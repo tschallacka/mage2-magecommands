@@ -14,7 +14,7 @@
                 Tschallacka\MageRain\File\Directory::BASE_PATH
             </argument>
             <argument name="development_directory" xsi:type="string">
-                local/
+                local
             </argument>
         </arguments>
     </type>

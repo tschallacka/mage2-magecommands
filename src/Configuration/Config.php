@@ -1,7 +1,8 @@
 <?php 
 namespace Tschallacka\MageCommands\Configuration;
 
-use Tschallacka\MageRain\File\Directory;
+
+use \Magento\Framework\Module\ModuleListInterface;
 
 class Config 
 {
@@ -14,25 +15,50 @@ class Config
     protected $vendor_path;
     
     /**
-     * Creates the configuration for the commands.
-     * @param string $base_path Base path to the magento installation
-     * @param string $development_directory where the modules will be created, relative to the base path. 
+     * @var ModuleListInterface
      */
-    public function __construct($base_path = BP, $development_directory = 'local', $vendor_path = null) 
+    protected $module_list;
+    
+    /**
+     * Creates the configuration for the commands.
+     * @param ModuleListInterface $module_list The full module list.
+     * @param string $base_path Base path to the magento installation
+     * @param string $development_directory where the modules will be created, relative to the base path.
+     * @param string $vendor_path a custom vendor path to the composer vendor directory 
+     */
+    public function __construct(ModuleListInterface $module_list, $base_path = BP, $development_directory = 'local', $vendor_path = null) 
     {
-        $this->local_dir = $this->base_path . DIRECTORY_SEPARATOR . $development_directory;
+        $this->local_dir = $development_directory;
         $this->base_path = $base_path;
         $this->vendor_path = $vendor_path;
+        $this->module_list = $module_list;
+    }
+    
+    /**
+     * Get the module list
+     * @return \Magento\Framework\Module\ModuleListInterface
+     */
+    public function getFullModuleList() 
+    {
+        return $this->module_list;    
     }
     
     /**
      * Returns the local development directory as an absolute path
+     * @return string
      */
     public function getLocalPath() 
     {
-        return $this->local_dir;
+        if(substr($this->local_dir, 0, 1) == DIRECTORY_SEPARATOR) {
+            return $this->local_dir;
+        }
+        return $this->base_path . DIRECTORY_SEPARATOR . $this->local_dir;
     }
     
+    /**
+     * Get the base path
+     * @return string
+     */
     public function getBasePath() 
     {
         return $this->base_path;
@@ -40,6 +66,9 @@ class Config
     
     public function getVendorPath()
     {
-        return $this->vendor_path;
+        if(is_null($this->vendor_path) || substr($this->vendor_path, 0, 1) == DIRECTORY_SEPARATOR) {
+            return $this->vendor_path;
+        }
+        return $this->base_path . DIRECTORY_SEPARATOR . $this->vendor_path;
     }
 }

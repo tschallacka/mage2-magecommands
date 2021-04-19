@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<alr:test-suite xmlns:alr="urn:model.allure.qatools.yandex.ru" start="1618864258599" stop="1618864258600" version="1.4.0">
-  <name>Tschallacka\MageCommands\Tests\Code\Unit\Test\Console\Argument\CreateModuleArgumentListTest</name>
-  <test-cases>
-    <test-case start="1618864258599" stop="1618864258600" status="passed">
-      <name>testAddArgumentFromInputString</name>
-    </test-case>
-  </test-cases>
-</alr:test-suite>

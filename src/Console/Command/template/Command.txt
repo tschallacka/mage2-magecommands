@@ -1,0 +1,38 @@
+<?php namespace %s;
+
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+
+class %s extends Command 
+{
+    const %s_COMMAND = '%s';
+    
+    public function __construct($name = null) 
+    {
+        parent::__construct($name);
+    }
+    
+    /**
+     * {@inheritdoc}
+     */
+    protected function configure()
+    {
+        $this->setName(self::%s)
+        ->setDescription('This is the help file for this command. Follow these instructions carefully as I will only print them once')
+        ->setDefinition([
+            %s
+        ]);
+        
+        parent::configure();
+    }
+    
+    /**
+     * {@inheritdoc}
+     */
+    protected function execute(InputInterface $input, OutputInterface $output)
+    {
+        $output->writeln('<fg=white;bg=green>Hello world!</>');
+    }
+}

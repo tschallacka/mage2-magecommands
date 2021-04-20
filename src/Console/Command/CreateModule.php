@@ -151,6 +151,7 @@ class CreateModule extends Command
     {
         $phpunit_dom = new \DOMDocument();
         $phpunit_dom->load($php_unit_xml_path);
+        
         $root = $phpunit_dom->getElementsByTagName('phpunit')->item(0);
         
         $testsuite = null;

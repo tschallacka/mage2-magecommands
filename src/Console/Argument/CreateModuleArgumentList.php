@@ -51,8 +51,13 @@ class CreateModuleArgumentList
         return $argument;
         
     }
-    
-    
+    /**
+     * @return CreateModuleCommandArgument[]
+     */
+    public function getArguments()
+    {
+        return $this->arguments;
+    }
     
     public function addArgument(Argument $item) 
     {
@@ -64,8 +69,9 @@ class CreateModuleArgumentList
         $last = count($this->arguments) - 1;
         foreach($this->arguments as $key => $value) {
             if($value->getType() == CreateModuleCommandArgument::ARRAY && $key < $last) {
-                $value->invalidArgument('Invalid argument type array for what is not the last argument but argument #'.($key+1).' of '.$last.'. Only last argument of command can be type array');
+                $value->invalidArgument('Invalid argument type "array" for what is not the last argument but argument #'.($key+1).' of '.$last.'. Only last argument of command can be type array');
             }                
         }
+        return true;
     }
 }

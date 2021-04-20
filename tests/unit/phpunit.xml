@@ -20,12 +20,10 @@
             <directory>../../../../../vendor/*/framework/*/Test/Unit</directory>
             <directory>../../../../../dev/tests/unit/*/Test/Unit</directory>
         </testsuite>
-    <testsuite name="Tschallacka_MageCommands"><directory>../code</directory></testsuite></testsuites>
+    <testsuite name="Tschallacka_MageCommands"><directory>../code/Unit</directory></testsuite></testsuites>
     <php>
         <ini name="date.timezone" value="America/Los_Angeles"/>
         <ini name="xdebug.max_nesting_level" value="200"/>
-        <ini name="display_errors" value="On" />
-        <ini name="display_startup_errors" value="On" />
     </php>
     <filter>
         <whitelist>

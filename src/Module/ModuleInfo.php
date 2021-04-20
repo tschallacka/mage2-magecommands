@@ -9,6 +9,8 @@ class ModuleInfo extends BaseInfo
 {
     protected $project_local_path;
     
+    protected $local_command_path;
+    
     protected $config;
     
     public function __construct($raw_name, Config $config)
@@ -58,6 +60,28 @@ class ModuleInfo extends BaseInfo
     }
     
     /**
+     * Get the DI dom document
+     * @return \DOMDocument
+     */
+    public function getDiDocument()
+    {
+        $di = new \DOMDocument();
+        $di->preserveWhiteSpace = false;
+        $di->formatOutput = true; 
+        $di->load($this->getDiPath());
+        
+        return $di;
+    }
+    
+    public function getDiPath() 
+    {
+        $etcpath = $this->getEtcPath();
+        
+        $di_path = $etcpath->getPath('di.xml');
+        return $di_path;
+    }
+    
+    /**
      * Returns the location of the src directory
      * @return \Tschallacka\MageRain\File\Directory
      */
@@ -73,6 +97,27 @@ class ModuleInfo extends BaseInfo
     public function getEtcPath()
     {
         return $this->getLocalPath()->getChild('etc');
+    }
+    
+    public function getCommandDir()
+    {
+        if(is_null($this->local_command_path)) {
+            $this->local_command_path = $this->getSourcePath()->createChildDirectory('Console')->createChildDirectory('Command');
+        }
+        return $this->local_command_path;
+    }
+    
+    public function getCommandNameSpace()
+    {
+        return $this->getNameSpace() . '\\Console\\Command';
+    }
+    
+    public function failIfNotInDevDir() 
+    {
+        if(!$this->getLocalPath()->exists()) {
+            throw new \InvalidArgumentException('Module '.$this->getMagentoModuleName().' not found '. 
+            'at '.$this->getLocalPath()->getPath(). '. Please install this plugin in the provided path before creating a command in it.');
+        }
     }
     
     /**

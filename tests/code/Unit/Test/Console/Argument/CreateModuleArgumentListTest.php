@@ -3,21 +3,31 @@
 use PHPUnit\Framework\TestCase;
 use Tschallacka\MageCommands\Console\Argument\CreateModuleArgumentList;
 use Tschallacka\MageCommands\Console\Argument\CreateModuleCommandArgument;
+use Tschallacka\MageCommands\Console\Command\CreateModuleCommand;
 
 /**
  *  test case.
  */
 class CreateModuleArgumentListTest extends TestCase
 {
+    protected $empty_argument = '';
+    
     protected $argument_name = 'test';
     
     protected $argument_name_need_optional = 'test:optional';
     protected $argument_name_need_required = 'test:required';
     protected $argument_name_need_invalid = 'test:invalid';
     
+    protected $argument_name_need_empty = 'test:';
+    protected $argument_empty_need_optional = ':optional';
+    protected $argument_empty_need_required = ':required';
+    protected $argument_empty_need_invalid = ':invalid';
+    
     protected $argument_name_need_optional_type_string = 'test:optional:string';
     protected $argument_name_need_required_type_string = 'test:required:string';
     protected $argument_name_need_invalid_type_string = 'test:invalid:string';
+    protected $argument_name_need_empty_type_string = 'test::string';
+    protected $argument_name_need_empty_type_empty = 'test::';
     
     
     protected $argument_name_need_optional_type_array = 'test:optional:array';
@@ -34,6 +44,8 @@ class CreateModuleArgumentListTest extends TestCase
     protected $argument_name_need_optional_type_array_description = 'test:optional:array:text';
     protected $argument_name_need_required_type_array_description = 'test:required:array:text';
     protected $argument_name_need_invalid_type_array_description = 'test:invalid:array:text';
+    protected $argument_name_need_empty_type_empty_description = 'test:::text';
+    protected $argument_name_need_empty_type_empty_description_empty = 'test:::';
     
     protected $argument_name_need_optional_type_invalid_description = 'test:optional:invalid:text';
     protected $argument_name_need_required_type_invalid_description = 'test:required:invalid:text';
@@ -66,15 +78,24 @@ class CreateModuleArgumentListTest extends TestCase
         $description = 'text';
         $empty_description = '';
         $testlist = [];
+        $testlist[] = new ArgumentTestConfig($this->empty_argument, $empty_description,CreateModuleCommandArgument::OPTIONAL, CreateModuleCommandArgument::STRING, $empty_description, \InvalidArgumentException::class );
+        
         $testlist[] = new ArgumentTestConfig($this->argument_name, $this->argument_name, CreateModuleCommandArgument::OPTIONAL, CreateModuleCommandArgument::STRING, $empty_description);
         
         $testlist[] = new ArgumentTestConfig($this->argument_name_need_optional, $this->argument_name, CreateModuleCommandArgument::OPTIONAL, CreateModuleCommandArgument::STRING, $empty_description);
         $testlist[] = new ArgumentTestConfig($this->argument_name_need_required, $this->argument_name, CreateModuleCommandArgument::REQUIRED, CreateModuleCommandArgument::STRING, $empty_description);
         $testlist[] = new ArgumentTestConfig($this->argument_name_need_invalid, $this->argument_name, $invalid, CreateModuleCommandArgument::STRING, $empty_description, \InvalidArgumentException::class);
+        $testlist[] = new ArgumentTestConfig($this->argument_name_need_empty, $this->argument_name, CreateModuleCommandArgument::OPTIONAL, CreateModuleCommandArgument::STRING, $empty_description);
+        
+        $testlist[] = new ArgumentTestConfig($this->argument_empty_need_optional, $empty_description, CreateModuleCommandArgument::OPTIONAL, CreateModuleCommandArgument::STRING, $empty_description, \InvalidArgumentException::class );
+        $testlist[] = new ArgumentTestConfig($this->argument_empty_need_required, $empty_description, CreateModuleCommandArgument::REQUIRED, CreateModuleCommandArgument::STRING, $empty_description, \InvalidArgumentException::class );
+        $testlist[] = new ArgumentTestConfig($this->argument_empty_need_invalid, $empty_description, $invalid, CreateModuleCommandArgument::STRING, $empty_description, \InvalidArgumentException::class );
         
         $testlist[] = new ArgumentTestConfig($this->argument_name_need_optional_type_string, $this->argument_name, CreateModuleCommandArgument::OPTIONAL, CreateModuleCommandArgument::STRING, $empty_description);
         $testlist[] = new ArgumentTestConfig($this->argument_name_need_required_type_string, $this->argument_name, CreateModuleCommandArgument::REQUIRED, CreateModuleCommandArgument::STRING, $empty_description);
         $testlist[] = new ArgumentTestConfig($this->argument_name_need_invalid_type_string, $this->argument_name, $invalid, CreateModuleCommandArgument::STRING, $empty_description, \InvalidArgumentException::class);
+        $testlist[] = new ArgumentTestConfig($this->argument_name_need_empty_type_string, $this->argument_name, CreateModuleCommandArgument::OPTIONAL, CreateModuleCommandArgument::STRING, $empty_description);
+        $testlist[] = new ArgumentTestConfig($this->argument_name_need_empty_type_empty, $this->argument_name, CreateModuleCommandArgument::OPTIONAL, CreateModuleCommandArgument::STRING, $empty_description);
         
         $testlist[] = new ArgumentTestConfig($this->argument_name_need_optional_type_array, $this->argument_name, CreateModuleCommandArgument::OPTIONAL, CreateModuleCommandArgument::ARRAY, $empty_description);
         $testlist[] = new ArgumentTestConfig($this->argument_name_need_required_type_array, $this->argument_name, CreateModuleCommandArgument::REQUIRED, CreateModuleCommandArgument::ARRAY, $empty_description);
@@ -90,6 +111,9 @@ class CreateModuleArgumentListTest extends TestCase
         $testlist[] = new ArgumentTestConfig($this->argument_name_need_optional_type_array_description, $this->argument_name, CreateModuleCommandArgument::OPTIONAL, CreateModuleCommandArgument::ARRAY, $description);
         $testlist[] = new ArgumentTestConfig($this->argument_name_need_required_type_array_description, $this->argument_name, CreateModuleCommandArgument::REQUIRED, CreateModuleCommandArgument::ARRAY, $description);
         $testlist[] = new ArgumentTestConfig($this->argument_name_need_invalid_type_array_description, $this->argument_name, $invalid, CreateModuleCommandArgument::ARRAY, $description, \InvalidArgumentException::class);
+        
+        $testlist[] = new ArgumentTestConfig($this->argument_name_need_empty_type_empty_description, $this->argument_name, CreateModuleCommandArgument::OPTIONAL, CreateModuleCommandArgument::STRING, $description);
+        $testlist[] = new ArgumentTestConfig($this->argument_name_need_empty_type_empty_description_empty, $this->argument_name, CreateModuleCommandArgument::OPTIONAL, CreateModuleCommandArgument::STRING, $empty_description);
         
         $testlist[] = new ArgumentTestConfig($this->argument_name_need_optional_type_invalid_description, $this->argument_name, CreateModuleCommandArgument::OPTIONAL, $invalid, $description, \InvalidArgumentException::class);
         $testlist[] = new ArgumentTestConfig($this->argument_name_need_required_type_invalid_description, $this->argument_name, CreateModuleCommandArgument::REQUIRED, $invalid, $description, \InvalidArgumentException::class);
@@ -110,10 +134,8 @@ class CreateModuleArgumentListTest extends TestCase
                     $list->addArgumentFromInputString($item->argument_string);
                 }
                 catch(\Exception $e) {
-                    if($e instanceof $item->expect_exception) {
-                        $this->assertEquals(1, 1);
-                        continue;
-                    }
+                    $this->assertInstanceOf($item->expect_exception, $e);
+                    continue;
                 }   
                 $this->fail('Exception was not thrown for invalid argument input '.$item->argument_string);
             }
@@ -128,6 +150,19 @@ class CreateModuleArgumentListTest extends TestCase
             $this->assertEquals($item->expected_type, $result->getType(), 'Failed assertion type for '.$item->argument_string);
             $this->assertEquals($item->expected_description, $result->getDescription(), 'Failed assertion description for '.$item->argument_string);
         }
+    }
+    
+    public function testValidate()
+    {
+        $list = new CreateModuleArgumentList();
+        $list->addArgumentFromInputString($this->argument_name);
+        $list->addArgumentFromInputString($this->argument_name);
+        $this->assertTrue($list->validate());
+        $list->addArgumentFromInputString($this->argument_name_need_optional_type_array);
+        $this->assertTrue($list->validate());
+        $list->addArgumentFromInputString($this->argument_name);
+        $this->expectException(\InvalidArgumentException::class);
+        $list->validate();
     }
 }
 class ArgumentTestConfig 

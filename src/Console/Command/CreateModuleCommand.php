@@ -14,10 +14,11 @@ use Tschallacka\MageRain\Helper\Text\Str;
 use Tschallacka\MageRain\File\TemplateFile;
 use Tschallacka\MageCommands\Console\Argument\CreateModuleCommandArgument;
 
+
 class CreateModuleCommand extends Command 
 {
 
-    const CREATE_MODULE_COMMAND_COMMAND = 'tsch:module:create-command';
+    const CREATE_MODULE_COMMAND_COMMAND = 'tsch:module:create:command';
     
     
     /**
@@ -82,10 +83,15 @@ class CreateModuleCommand extends Command
         $path = $this->getPathFromCommandName($command, $module);
         
         $arguments = $this->getArgumentList($input, $module);
+        $const_argument_name_collection = [];
         $argument_collection = [];
+        $const_argument_value_holders = [];
+        $const_argument_value_assigners = [];
         foreach($arguments->getArguments() as $argument) {
-            $argument_collection[] = $argument->createInputArgumentText($argument);
-            
+            $argument_collection[] = $argument->createInputArgumentText();
+            $const_argument_name_collection[] = $argument->createInputArgumentConstant();
+            $const_argument_value_holders[] = $argument->createInputArgumentValueHolder();
+            $const_argument_value_assigners[] = $argument->createInputArgumentValueAssigner();
         }
         $command_executor = str_replace('_',':',strtolower($module->getMagentoModuleName())).':'.$command;
         $this->writeTemplatedFile($output, 'Command.txt', $path, [
@@ -93,8 +99,11 @@ class CreateModuleCommand extends Command
             $this->getClassNameFromCommandName($command),
             strtoupper($command),
             $command_executor,
+            implode("\n    ", $const_argument_name_collection),
+            implode('', $const_argument_value_holders),
             strtoupper($command),
-            implode(',', $argument_collection),            
+            implode(",\n            ", $argument_collection),
+            implode('', $const_argument_value_assigners)
         ]);
         $output->writeln("Modifying <fg=yellow>".$module->getDiPath() . "</> to register the new command");
         $this->addCommand($module, $command, $classname);

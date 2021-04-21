@@ -21,6 +21,7 @@ class CreateModuleCommandArgument
         $this->need = $this->validateNeed($need);
         
         $this->type = $this->validateType($type);
+        
         $this->description = $description;
     }
     
@@ -64,14 +65,16 @@ class CreateModuleCommandArgument
             %s,
             \"%s\")";
         
-        $need = $this->getNeed() == self::STRING ? 'InputArgument::STRING' : 'InputArgument::ARRAY';
-        $array = $this->getType() == self::ARRAY ? ' | InputArgument::ARRAY' : '';
-        
-        return sprintf($str, [
+        $need = $this->getNeed() == self::OPTIONAL ? 'InputArgument::OPTIONAL' : 'InputArgument::REQUIRED';
+        $array = $this->getType() == self::ARRAY ? ' | InputArgument::IS_ARRAY' : '';
+        $args = [
             $this->getName(),
             $need . $array,
-            $this->getDescription()            
-        ]);
+            $this->getDescription()
+        ];
+        
+        return vsprintf($str, $args);
+        
     }
     
     public function getConstantName()

@@ -1,6 +1,7 @@
 <?php namespace Tschallacka\MageCommands\Console\Command;
 
 use InvalidArgumentException;
+use Magento\Setup\Console\Command\DiCompileCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
@@ -28,9 +29,12 @@ class CreateModuleCommand extends Command
     
     const COMMAND_ARGUMENTS = 'command arguments';
     
+
+    
     public function __construct($name = null, Config $config)
     {
         $this->config = $config;
+        
         parent::__construct($name);
     }
     
@@ -70,7 +74,7 @@ class CreateModuleCommand extends Command
         $module = $this->getModuleInfoFromValidArgument($input);
         
         $command = $this->getCommand($input, $module);
-        dump($module);
+
         $this->validateCommandName($module, $command);
         
         $classname = $this->getQualifiedClassFromCommandName($command, $module);
@@ -81,19 +85,24 @@ class CreateModuleCommand extends Command
         $argument_collection = [];
         foreach($arguments->getArguments() as $argument) {
             $argument_collection[] = $argument->createInputArgumentText($argument);
+            
         }
-        dump($argument_collection);
+        $command_executor = str_replace('_',':',strtolower($module->getMagentoModuleName())).':'.$command;
         $this->writeTemplatedFile($output, 'Command.txt', $path, [
             $module->getCommandNameSpace(), 
             $this->getClassNameFromCommandName($command),
             strtoupper($command),
-            str_replace('_',':',strtolower($module->getMagentoModuleName())).':'.$command,
-            
+            $command_executor,
             strtoupper($command),
             implode(',', $argument_collection),            
         ]);
-        
+        $output->writeln("Modifying <fg=yellow>".$module->getDiPath() . "</> to register the new command");
         $this->addCommand($module, $command, $classname);
+        $output->writeln('<fg=white;bg=green>Command '.$command.' successfully registered. '.
+                        'Please run</> <fg=yellow;bg=black>bin/magento setup:di:compile </> <fg=white;bg=green>'.
+                        'to activate the command.</>'
+            );
+        $output->writeln("To execute the command run <fg=yellow;bg=black>bin/magento $command_executor</>");
         
     }
     
@@ -152,7 +161,7 @@ class CreateModuleCommand extends Command
         }
         $path .= "/argument[@name='commands']";
         $argument = $xpath->query($path);
-        dump([$path ,$argument]);
+
         if($argument->length == 0) {
             $argument = $di->createElement('argument');
             $argument->setAttribute('name', 'commands');

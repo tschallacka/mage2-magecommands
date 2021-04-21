@@ -19,7 +19,7 @@ class %s extends Command
      */
     protected function configure()
     {
-        $this->setName(self::%s)
+        $this->setName(self::%s_COMMAND)
         ->setDescription('This is the help file for this command. Follow these instructions carefully as I will only print them once')
         ->setDefinition([
             %s

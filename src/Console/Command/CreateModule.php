@@ -67,7 +67,9 @@ class CreateModule extends Command
     {
         
         $module = $this->getModuleInfoFromValidArgument($input);
-        
+        if($this->config->module_list->has($module->getMagentoModuleName())) {
+            throw new InvalidArgumentException('The module '. $name .' already exists. Please use another module name.');
+        }
         
         $output->writeln("Creating directory structure for module ".$input);
         

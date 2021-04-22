@@ -19,35 +19,40 @@ This plugin will require that you do your module development in a folder named `
 If you create your modules via the MageCommands module, it will automatically register a repository in your Magento
 root composer.json so you can install your newly created module into the corrent vendor folder via symlink.
 
-#creating a module
+# creating a module
 
-command: `bin/magento tsch:module:create <module_name>`
+**command**: `bin/magento tsch:module:create <module_name>`
 
-requires: <module_name> A module name in the format of "AuthorName_ModuleName". Example: "Tschallacka_SalesMonitor"
+**requires**: <module_name> A module name in the format of "AuthorName_ModuleName". Example: "Tschallacka_SalesMonitor"
 
-performs: 
+**performs**: 
 
    - Creates a bare bones plugin development folder in /magento/root/folder/local/authorname/modulename
    - registers plugin in /magento/root/composer.json
    - creates tests/unit/phpunit.xml for running local unit tests, code for these tests should be placed in tests/code
+   - creates tests/unit/framework/bootstrap.php for bootstrapping the magento bootstrap
    - creates etc/di.xml
    - creates etc/module.xml
    - creates composer.json
    - creates registration.php
+   - outputs which commands you need to execute to install the plugin
     
-#creating a command
+# creating a command
 
-command: `bin/magento tsch:module:create:command <module_name> <command_name> [<command arguments>...]`
+**command**: `bin/magento tsch:module:create:command <module_name> <command_name> [<command arguments>...]`
 
-requires:  
+**requires**:  
 
-   - <module_name> A module name in the format of "AuthorName_ModuleName". Example: "Tschallacka_SalesMonitor"
-   - <command_name> the name of the command, unique for your  module. The command will become authorname:modulename:commandname
+   - **<module_name>** A module name in the format of `AuthorName_ModuleName`. Example: `Tschallacka_SalesMonitor`
+   - **<command_name>** the name of the command, unique for your  module. The command will become `authorname:modulename:commandname`
  
-optional:    
-   <command arguments> 
-   Command arguments can be provided in the format of `"[==]argument_name:<optional|required>:<string:array:none>:<help description>"`  
-   If you start your command argument with `==` then it will become an input option. Othewise it becomes an argument.
+![Image of output](https://i.imgur.com/W3OegE6.png) 
+
+**optional:**    
+   **<command arguments>** 
+   Command arguments can be provided in the format of `"[==]argument_name:<optional|required>:<string:array:none>:<help description>"`   
+   If you start your command argument with `==` then it will become an input option. Othewise it becomes an argument.  
+   You can only use type none with an optional command(`==argumentname`)
    
    **Examples**
    
@@ -59,7 +64,13 @@ optional:
    
    *bin/magento author:module:command --make="stew" carrots beef apples*   
    `bin/magento tsch:module:create:command Author_Module  command "==make:required:string:what to cook stew or soup" "ingredients:required:array:what to put in the stew"
+
+![Image of output](https://i.imgur.com/xTAzOSb.png)
    
-performs:
-    witchcraft and curses
+**performs:**
+
+   - creates file Console/Commands/CommandName.php
+   - registers command in etc/di.xml
+   - outputs which commands you need to run to activate the command
+   
    

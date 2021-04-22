@@ -1,4 +1,6 @@
 .settings
 .project
 .buildpath
+/debug_tools.php
 tests/code/var
+/vendor

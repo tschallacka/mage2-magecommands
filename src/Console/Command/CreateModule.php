@@ -1,21 +1,19 @@
 <?php
 namespace Tschallacka\MageCommands\Console\Command;
 
-use InvalidArgumentException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Magento\Framework\App\ObjectManager;
-
-
 use Tschallacka\MageCommands\Configuration\Config;
 use Tschallacka\MageCommands\Module\ModuleInfo;
-use Tschallacka\MageRain\File\Format\Composer;
-use Tschallacka\MageRain\File\TemplateFile;
 use Tschallacka\MageRain\File\Directory;
+use Tschallacka\MageRain\Helper\Xml\Xml;
+use Tschallacka\MageRain\File\TemplateFile;
+use Tschallacka\MageRain\File\Format\Composer;
 use Tschallacka\MageRain\File\Transformer\StringReplaceTransformer;
+use InvalidArgumentException;
+
 /**
  * Class CreateModule
  */
@@ -67,7 +65,7 @@ class CreateModule extends Command
     {
         
         $module = $this->getModuleInfoFromValidArgument($input);
-        if($this->config->module_list->has($module->getMagentoModuleName())) {
+        if($this->config->getFullModuleList()->has($module->getMagentoModuleName())) {
             throw new InvalidArgumentException('The module '. $name .' already exists. Please use another module name.');
         }
         
@@ -158,12 +156,17 @@ class CreateModule extends Command
         
         $testsuite = null;
         $testsuites = $phpunit_dom->getElementsByTagName('testsuites');
+        
         if($testsuites->count() == 0) {
             $testsuite = $phpunit_dom->createElement('testsuites');
             $root->appendChild($testsuites);
         }
         else {
             $testsuite = $testsuites->item(0);
+            /** remove the magento test suites **/
+            while ($testsuite->hasChildNodes()){
+                $testsuite->removeChild($testsuite->childNodes->item(0));
+            }
         }
         $suite = $phpunit_dom->createElement('testsuite');
         $suite->setAttribute('name', $module->getMagentoModuleName());
@@ -175,6 +178,7 @@ class CreateModule extends Command
         $text = $phpunit_dom->createTextNode('../code');
         $directory->appendChild($text);
         
+        $phpunit_dom = Xml::prettify($phpunit_dom);
         $phpunit_dom->save($php_unit_xml_path);
     }
     

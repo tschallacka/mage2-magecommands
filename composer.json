@@ -3,10 +3,9 @@
 	"description" : "Magento 2 Command Utilities to aid developers and the development process",
 	"type" : "magento2-module",
 	"license" : "MIT",
-	"version" : "1.0.2",
 	"require" : {
-		"tschallacka/mage2-magerain":"*",
-		"composer/composer":"*"
+		"tschallacka/mage2-magerain" : "*",
+		"composer/composer" : "*"
 	},
 	"autoload" : {
 		"files" : [

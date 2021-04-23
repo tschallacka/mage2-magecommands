@@ -7,7 +7,7 @@ This Magento Module is only intended currently for Magento 2.4. It might work in
 To install this module run in your magento root folder
 
 ```bash
-composer require tschallacka/mage2-magecommands && \
+composer require --dev tschallacka/mage2-magecommands && \
 bin/magento module:enable Tschallacka_MageCommands && \
 bin/magento setup:di:compile
 ```
@@ -15,9 +15,22 @@ bin/magento setup:di:compile
 With this a couple commands are added in the `tsch` namespace so it will be easier to start developing certain magento
 modules.
 
-This plugin will require that you do your module development in a folder named `local` in your magento root.
-If you create your modules via the MageCommands module, it will automatically register a repository in your Magento
-root composer.json so you can install your newly created module into the corrent vendor folder via symlink.
+# Workspace setup
+
+This plugin will require that you do your module development in a folder named `local` in your magento root.  
+
+If you create your modules via the MageCommands, it will automatically register a local directory repository in your development Magento
+root composer.json that points to the newly created module in the `local` folder, so you can install your newly created module into the correct vendor folder via symlink via composer require and everything works as if it's a properly installed module.
+
+Quick workflow for creating a module and installing it:
+
+```bash
+bin/magento tsch:module:create HappyCoder_AwesomeModule && \
+composer require happy-coder/awesome-module && \
+bin/magento module:enable HappyCoder_AwesomeModule \
+bin/magento setup:di:compile
+```
+
 
 # creating a module
 

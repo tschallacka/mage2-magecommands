@@ -2,8 +2,10 @@
 	"name" : "tschallacka/mage2-magecommands",
 	"description" : "Magento 2 Command Utilities to aid developers in their development process",
 	"type" : "magento2-module",
+    
 	"license" : "MIT",
-    "version" : "1.0.4",
+    "version" : "1.0.4" ,
+    
 	"require" : {
 		"tschallacka/mage2-magerain" : "^1.0.0"
 	},

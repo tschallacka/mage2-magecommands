@@ -7,7 +7,7 @@ This Magento Module is only intended currently for Magento 2.4. It might work in
 To install this module run in your magento root folder
 
 ```bash
-composer require tschallacka/mage2-magecommands 1.0.3 && \
+composer require tschallacka/mage2-magecommands && \
 bin/magento module:enable Tschallacka_MageCommands && \
 bin/magento setup:di:compile
 ```
@@ -20,6 +20,8 @@ If you create your modules via the MageCommands module, it will automatically re
 root composer.json so you can install your newly created module into the corrent vendor folder via symlink.
 
 # creating a module
+
+When paths are not started with a / you can assume your current working directory is the magento root folder, /var/www/html for the examples below.
 
 **command**: `bin/magento tsch:module:create <module_name>`
 

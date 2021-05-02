@@ -4,7 +4,7 @@
 	"type" : "magento2-module",
     
 	"license" : "MIT",
-    "version" : "1.0.4" ,
+    "version" : "1.0.5" ,
     
 	"require" : {
 		"tschallacka/mage2-magerain" : "^1.0.0"
@@ -16,5 +16,8 @@
 		"psr-4" : {
 			"Tschallacka\\MageCommands\\" : "src"
 		}
-	}
+	},
+    "bin" : [
+        "mage_unit_test"
+    ]
 }

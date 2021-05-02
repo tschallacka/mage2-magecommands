@@ -1,0 +1,135 @@
+#!/usr/bin/env php
+<?php declare(strict_types=1);
+namespace Tschallacka\MageCommands\Composer;
+
+/**
+  * This file is part of Tschallacka's MageCommands Development helper module
+  * This file will aid you in running unit tests for your projects somewhat easier
+  * than typing out the full configuration paths to the plugin phpunit.xml
+  * usage: 
+  *    - composer test : Runs Magento unit tests
+  *    - composer test AuthorName_ModuleName : Runs all tests within given module's phpunit.xml   
+  *    - composer test AuthorName_ModuleName TestSuite : Runs the given test suite within the module
+  */
+$path = 'doesnotexist';
+if(!file_exists('.phpunit_nostrict.php')) {
+	$PHPUNIT = '.phpunit_nostrict.php';
+	$php_unit_root_path = __DIR__;
+	$php_unit_root_path = str_replace(['/local/','tschallacka/mage2-magecommands','tschallacka/magecommands'],['/vendor/', 'phpunit/phpunit', 'phpunit/phpunit'], $php_unit_root_path);
+	$phpunit_file = 'vendor/bin/phpunit';
+	$contents = str_replace(['#!/usr/bin/env php'.PHP_EOL, '<?php declare(strict_types=1);', '__DIR__'], ['','<?php','"'.$php_unit_root_path.'"'], file_get_contents($phpunit_file));
+	$path = __DIR__ . DIRECTORY_SEPARATOR . $PHPUNIT;
+	file_put_contents($path, $contents);
+}
+
+function thankyou($magento_unit_tests_xml) 
+{
+   fwrite(
+        STDOUT,
+        sprintf('================================================================================'.PHP_EOL.
+        'Thank you for using Tschallacka\'s Mage Command Developer tools'.PHP_EOL.
+        'Running all Magento test suites as defined in in the phpunit.xml file at'.PHP_EOL.
+        '%s'. PHP_EOL.
+        'Have an excellent day' . PHP_EOL.
+        '================================================================================'.PHP_EOL,
+        $magento_unit_tests_xml)
+   ); 
+}
+
+
+function print_error($error_message) 
+{
+   fwrite(
+        STDERR,
+        sprintf('================================================================================'.PHP_EOL.
+        'AN ERROR HAS OCCURED TRYING TO RUN THIS TEST'.PHP_EOL.
+        '%s'. PHP_EOL.
+        '--------------------------------------------------------------------------------'.PHP_EOL.
+        'Apologies for the inconvenience, have an excellent day' . PHP_EOL.
+        '================================================================================'.PHP_EOL,
+        $error_message)
+    );
+}
+
+function snake($value) 
+{
+    if(!ctype_lower($value)) {
+       $key = $value;
+       $value = preg_replace('/\s+/u', '', ucwords($value));
+       $replaced = preg_replace('/(.)(?=[A-Z])/u', '$1'.'_', $value);
+       $value = mb_strtolower($replaced, 'UTF-8');
+       
+    }
+    return $value;
+}
+    
+function dashing($input)
+{
+    return str_replace('_','-', snake($input));
+}
+
+
+if($argc === 0) {
+    $magento_unit_tests_file = 'dev/tests/unit/phpunit.xml.dist';
+	$argv[] = '-c';
+	$argv[] = $magento_unit_tests_file;
+	$argc = count($argv);
+    thankyou($magento_unit_tests_file);
+	$_SERVER['argv'] = $argv;
+	$_SERVER['argc'] = $argc;
+    require $path;
+	
+    exit;
+}
+if ($argc === 1 || $argc === 2) {
+    $module_name = $argv[1];
+    $vendor_path = ['vendor'];
+    $magento_name_used = (bool)preg_match("/^[A-Z][A-Za-z0-9]+_[A-Z][A-Za-z0-9]+$/",$module_name);
+    /** magento module name, try to guess the package name */
+    if ($magento_name_used) { 
+    	$module_data = explode('_', $module_name);
+    	$author_name = dashing($module_data[0]);
+    	$package_name = dashing($module_data[1]);
+    	$vendor_path[] = $author_name;
+    	$vendor_path[] = $package_name;
+    }
+    else {
+    	$vendor_path[] = $module_name;
+    }
+    $vendor_path = implode('/', $vendor_path);
+    if (!(file_exists($vendor_path) && is_dir($vendor_path))) {
+    	print_error("Could not find path ".getcwd()."/$vendor_path for $module_name.".
+    	($magento_name_used ? PHP_EOL."Consider using the Composer package name to run the tests instead of the Magento module name.":''));
+    	exit(0xDEAD);
+    }
+
+    $pattern = '/phpunit\.xml/'; //use "//" for all files
+    $directoryIterator = new \RecursiveDirectoryIterator($vendor_path);
+    $iteratorIterator = new \RecursiveIteratorIterator($directoryIterator);
+    $regexIterator = new \RegexIterator($iteratorIterator, $pattern);
+    $phpunit_xml = null;
+    foreach ($regexIterator as $file) {
+       if (is_dir("$file")) continue;
+       $phpunit_xml = "$file\n";
+       break;
+     }
+     if(is_null($phpunit_xml)) {
+     	print_error("Could not find a phpunit.xml in path ".getcwd()."/$vendor_path for $module_name."."");
+     }
+     $test_suite = null;
+     if($argc === 3) {
+        $test_suite = $argv[2];
+     }
+     $argv[1] = '-c';
+     $argv[2] = $phpunit_xml;
+     if(!is_null($test_suite)) {
+     	$argv[3] = '--test-suite';
+     	$argv[4] = $test_suite;
+     }
+     thankyou($phpunit_xml);
+	$_SERVER['argv'] = $argv;
+	$_SERVER['argc'] = $argc;
+    require $path;
+}
+
+echo var_export($argv,true);

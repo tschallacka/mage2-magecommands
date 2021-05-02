@@ -250,8 +250,22 @@ class CreateModule extends Command
         
         $this->addPackageToRequire($magento_composer, $module);
         $this->addPackageAsLocalRepository($magento_composer, $module);
+        $this->addUnitTestToComposer($magento_composer, $module);
         
         $magento_composer->save();
+    }
+    
+    public function addUnitTestToComposer(Composer $magento_composer, ModuleInfo $module)
+    {
+        $scripts = $magento_composer->get('scripts', []);
+        $path = $module->getLocalPath()->getPath();
+        $path = str_replace($module->getSourcePath(),'',$path);
+        $key = 'test_'.$module->getMagentoModuleName();
+        if(!array_key_exists($key, $scripts)) {
+            $scripts[$key] = ["phpunit --configuration $path/tests/unit/phpunit.xml --testsuite ".$module->getMagentoModuleName()];
+            $magento_composer->scripts = $scripts;
+        }
+        return $magento_composer;
     }
     
     public function addPackageAsLocalRepository(Composer $composer, ModuleInfo $module)

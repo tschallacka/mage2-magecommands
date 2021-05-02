@@ -1,6 +1,7 @@
 .settings
 .project
 .buildpath
+.phpunit_nostrict.php
 /debug_tools.php
 tests/code/var
 /vendor

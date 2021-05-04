@@ -170,7 +170,7 @@ class CreateModule extends Command
         }
         $suite = $phpunit_dom->createElement('testsuite');
         $suite->setAttribute('name', $module->getMagentoModuleName());
-        $testsuite->appendChild($suite);
+        $testsuites->appendChild($suite);
         
         $directory = $phpunit_dom->createElement('directory');
         $suite->appendChild($directory);

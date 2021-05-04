@@ -134,6 +134,10 @@ class CreateModule extends Command
         $unitTest->addTransformer(new StringReplaceTransformer([$magento_root, $dev_root], [$root_path, $dev_path]));
         $unitTest->save([]);
         
+        $config_dir = $codeDir->createChildDirectory('Configuration');
+        $demo_test = new TemplateFile(__DIR__.'/template/Configuration.txt', $config_dir->getPath('ConfigurationTest.php'));
+        $demo_test->save([]);
+        
         $frameworkDir = $unitDir->createChildDirectory('framework');
         
         $this->writeTemplatedFile($output, 'phpunit_bootstrap.txt', $frameworkDir->getPath('bootstrap.php'), [$phpunit_relative_path_to_root.'/..']);
@@ -162,10 +166,10 @@ class CreateModule extends Command
             $root->appendChild($testsuites);
         }
         else {
-            $testsuite = $testsuites->item(0);
+            $testsuites = $testsuites->item(0);
             /** remove the magento test suites **/
-            while ($testsuite->hasChildNodes()){
-                $testsuite->removeChild($testsuite->childNodes->item(0));
+            while ($testsuites->hasChildNodes()){
+                $testsuites->removeChild($testsuites->childNodes->item(0));
             }
         }
         $suite = $phpunit_dom->createElement('testsuite');
@@ -213,12 +217,33 @@ class CreateModule extends Command
     public function writeModuleToComposer(Composer $composer, ModuleInfo $module)
     {
         $composer->addAuthor($module->getAuthorName());
+        $composer->addTransformer(new StringReplaceTransformer(['"require": [],'], ['"require": {},']));
         $composer->description = "A magento2 module";
         $composer->put('autoload.psr-4', [
             $module->getNameSpace().'\\' => 'src'
         ]);
         $composer->put('autoload.files', [
             'registration.php'
+        ]);
+        
+        $magento_composer = $this->getComposer(BP.'/composer.json');
+        $magento_composer->load();
+        
+        $composer->put('require-dev', [
+            'phpunit/phpunit' => $magento_composer->get('require-dev.phpunit/phpunit', '^9'),
+            "squizlabs/php_codesniffer" => $magento_composer->get('squizlabs/php_codesniffer', "~3.5.4"),
+            "php-parallel-lint/php-parallel-lint" => $magento_composer->get("php-parallel-lint/php-parallel-lint", "^1.0"),
+        ]);
+        $composer->put('scripts', [
+            "test" => [
+                'phpunit --configuration tests/unit/phpunit.xml --stop-on-failure'   
+            ],
+            "sniff" => [
+                'phpcs --colors -nq --report="full" --extensions="php"'
+            ],
+            "lint" => [
+                "parallel-lint --exclude vendor ."
+            ],
         ]);
         $composer->type = "magento2-module";
         $composer->name = $module->getPackageName();
@@ -248,11 +273,19 @@ class CreateModule extends Command
         $magento_composer = $this->getComposer($path);
         $magento_composer->load();
         
+        $this->addModuleVendorFoldersToExcludeFromMagentoAutoload($magento_composer);
         $this->addPackageToRequire($magento_composer, $module);
         $this->addPackageAsLocalRepository($magento_composer, $module);
         $this->addUnitTestToComposer($magento_composer, $module);
         
         $magento_composer->save();
+    }
+    
+    public function addModuleVendorFoldersToExcludeFromMagentoAutoload(Composer $magento_composer) 
+    {
+        $excludes = $magento_composer->get('autoload.exclude-from-classmap', []);
+        $excludes = array_merge($excludes, ['local/*/*/vendor', 'vendor/*/*/vendor']);
+        $magento_composer->put('autoload.exclude-from-classmap', $excludes);
     }
     
     public function addUnitTestToComposer(Composer $magento_composer, ModuleInfo $module)

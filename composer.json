@@ -1,11 +1,8 @@
 {
 	"name" : "tschallacka/mage2-magecommands",
 	"description" : "Magento 2 Command Utilities to aid developers in their development process",
-	"type" : "magento2-module",
-    
-	"license" : "MIT",
-    "version" : "1.0.5" ,
-    
+	"type" : "magento2-module",  
+	"license" : "MIT",    
 	"require" : {
 		"tschallacka/mage2-magerain" : "^1.0.1"
 	},
@@ -15,7 +12,11 @@
 		],
 		"psr-4" : {
 			"Tschallacka\\MageCommands\\" : "src"
-		}
+		},
+        "exclude-from-classmap": [
+            "local/*/*/vendor",
+            "vendor/*/*/vendor"
+        ]    
 	},
     "bin" : [
         "mage_unit_test"

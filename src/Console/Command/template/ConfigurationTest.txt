@@ -1,0 +1,16 @@
+<?php namespace %s\Tests\Code\Unit\Test\Configuration;
+
+use %s\Configuration\Config;
+use PHPUnit\Framework\TestCase;
+
+class ConfigurationTest extends TestCase
+{   
+    /**
+     * Demo test
+     */
+    public function testConfigModuleName() 
+    {
+        $this->assertNotNull(Config::MODULE_NAME);
+        $this->assertNotEmpty(Config::MODULE_NAME);
+    }
+}

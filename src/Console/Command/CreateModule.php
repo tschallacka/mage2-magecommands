@@ -158,7 +158,7 @@ class CreateModule extends Command
         $testsuites = $phpunit_dom->getElementsByTagName('testsuites');
         
         if($testsuites->count() == 0) {
-            $testsuite = $phpunit_dom->createElement('testsuites');
+            $testsuites = $phpunit_dom->createElement('testsuites');
             $root->appendChild($testsuites);
         }
         else {

@@ -7,7 +7,7 @@
     "version" : "1.0.5" ,
     
 	"require" : {
-		"tschallacka/mage2-magerain" : "^1.0.0"
+		"tschallacka/mage2-magerain" : "^1.0.1"
 	},
 	"autoload" : {
 		"files" : [

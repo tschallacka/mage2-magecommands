@@ -140,7 +140,7 @@ class CreateModule extends Command
         
         $frameworkDir = $unitDir->createChildDirectory('framework');
         
-        $this->writeTemplatedFile($output, 'phpunit_bootstrap.txt', $frameworkDir->getPath('bootstrap.php'), [$phpunit_relative_path_to_root.'/..']);
+        $this->writeTemplatedFile($output, 'phpunit_bootstrap.txt', $frameworkDir->getPath('bootstrap.php'), [$module->getNameSpace() . '/..']);
         
         $this->modifyTestSuite($output, $module, $php_unit_xml_path);
     }

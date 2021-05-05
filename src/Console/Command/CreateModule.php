@@ -104,7 +104,13 @@ class CreateModule extends Command
                                  );
         
         $this->registerModuleInMagentoComposer($output, $module);
+        $this->createSetupDirectory($output, $module);
         $this->printSuccess($output, $module);
+    }
+    
+    protected function createSetupDirectory() 
+    {
+            
     }
     
     /**

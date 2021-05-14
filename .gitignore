@@ -1,6 +1,7 @@
 .settings
 .project
 .buildpath
+.idea
 .phpunit_nostrict.php
 /debug_tools.php
 tests/code/var

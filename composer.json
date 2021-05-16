@@ -1,8 +1,8 @@
 {
 	"name" : "tschallacka/mage2-magecommands",
 	"description" : "Magento 2 Command Utilities to aid developers in their development process",
-	"type" : "magento2-module",  
-	"license" : "MIT",    
+	"type" : "magento2-module",
+	"license" : "MIT",
 	"require" : {
 		"tschallacka/mage2-magerain" : "^1.0.1"
 	},
@@ -16,8 +16,19 @@
         "exclude-from-classmap": [
             "local/*/*/vendor",
             "vendor/*/*/vendor"
-        ]    
+        ]
 	},
+    "scripts": {
+        "test": [
+            "phpunit --configuration tests/unit/phpunit.xml --stop-on-failure"
+        ],
+        "sniff": [
+            "phpcs --colors -nq --report=\"full\" --extensions=\"php\""
+        ],
+        "lint": [
+            "parallel-lint --exclude vendor ."
+        ]
+    },
     "bin" : [
         "mage_unit_test"
     ]

@@ -13,21 +13,21 @@ use Magento\Framework\Module\FullModuleList;
 class ModuleInfoTest extends TestCase
 {
     protected $module_info;
-    
+
     protected $config;
-    
+
     protected $module_info_mocked;
-    
+
     /**
      * Prepares the environment before running a test.
      */
     protected function setUp(): void
     {
         $this->config = $this->createMock(Config::class);
-        
+
         $modulelist = $this->getMockForAbstractClass(\Magento\Framework\Module\ModuleListInterface::class);
-        
-        $this->config->method('getFullModuleList')->willReturn($modulelist); 
+
+        $this->config->method('getFullModuleList')->willReturn($modulelist);
         $this->config->method('getLocalPath')->willReturn('/tmp');
         $this->config->method('getBasePath')->willReturn('/tmp');
         $this->config->method('getVendorPath')->willReturn('/tmp');
@@ -55,63 +55,63 @@ class ModuleInfoTest extends TestCase
         $module_directory = $this->createMock(Directory::class);
         $module_directory->method('exists')->willReturn(false);
         $this->assertTrue($this->module_info->failTestPath($module_directory));
-        
+
         $module_directory = $this->createMock(Directory::class);
         $module_directory->method('exists')->willReturn(true);
         $this->expectException(InvalidArgumentException::class);
         $this->module_info->failTestPath($module_directory);
     }
-    
-    public function testGetLocalPath() 
+
+    public function testGetLocalPath()
     {
         $this->assertEquals($this->module_info->getLocalPath(), '/tmp/author-name/module-name');
     }
-    
+
     public function testGetVendorPath()
     {
         $this->assertEquals($this->module_info->getVendorPath('/test'), '/test/author-name/module-name');
         $this->assertEquals($this->module_info->getVendorPath(), '/tmp/author-name/module-name');
     }
-    
-    public function testGetSourcePath() 
+
+    public function testGetSourcePath()
     {
-        $this->assertEquals($this->module_info->getSourcePath()->getPath(), '/tmp/author-name/module-name/src');
+        $this->assertEquals($this->module_info->getSourcePath()->getPath(), '/tmp/author-name/module-name');
     }
-    
+
     public function testGetEtcPath()
     {
         $this->assertEquals($this->module_info->getEtcPath()->getPath(), '/tmp/author-name/module-name/etc');
     }
-    
-    public function testCheckIfDirectoryExists() 
+
+    public function testCheckIfDirectoryExists()
     {
         $directory = $this->createMock(Directory::class);
         $directory->method('exists')->willReturn(false);
-        
+
         $this->module_info_mocked->setMock($directory);
         $this->assertTrue($this->module_info_mocked->checkIfDirectoryExists());
-        
+
         $directory = $this->createMock(Directory::class);
         $directory->method('exists')->willReturn(true);
-        
+
         $this->module_info_mocked->setMock($directory);
         $this->expectException(\InvalidArgumentException::class);
         $this->module_info_mocked->checkIfDirectoryExists();
     }
-    
-    
+
+
 }
 
-class ModuleInfoTestInstance extends ModuleInfo 
+class ModuleInfoTestInstance extends ModuleInfo
 {
     private $mock;
-    
-    public function setMock($path) 
+
+    public function setMock($path)
     {
         $this->mock = $path;
     }
-    
-    public function getLocalPath() 
+
+    public function getLocalPath()
     {
         return $this->mock;
     }

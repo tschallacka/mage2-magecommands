@@ -64,23 +64,23 @@ class ModuleInfoTest extends TestCase
 
     public function testGetLocalPath()
     {
-        $this->assertEquals($this->module_info->getLocalPath(), '/tmp/author-name/module-name');
+        $this->assertEquals('/tmp/author-name/module-name', $this->module_info->getLocalPath());
     }
 
     public function testGetVendorPath()
     {
-        $this->assertEquals($this->module_info->getVendorPath('/test'), '/test/author-name/module-name');
-        $this->assertEquals($this->module_info->getVendorPath(), '/tmp/author-name/module-name');
+        $this->assertEquals('/test/author-name/module-name', $this->module_info->getVendorPath('/test'));
+        $this->assertEquals('/tmp/author-name/module-name', $this->module_info->getVendorPath());
     }
 
     public function testGetSourcePath()
     {
-        $this->assertEquals($this->module_info->getSourcePath()->getPath(), '/tmp/author-name/module-name');
+        $this->assertEquals('/tmp/author-name/module-name', $this->module_info->getSourcePath()->getPath());
     }
 
     public function testGetEtcPath()
     {
-        $this->assertEquals($this->module_info->getEtcPath()->getPath(), '/tmp/author-name/module-name/etc');
+        $this->assertEquals('/tmp/author-name/module-name/etc', $this->module_info->getEtcPath()->getPath());
     }
 
     public function testCheckIfDirectoryExists()
